@@ -5,6 +5,8 @@ $dbCredentials = "dbCredentials.php";
 include($dbCredentials);
 
 global $mysqli;
+global $inventory;
+global $filteredInventory;
 
 function createDBConnection($dbhost, $dbuser, $dbpass, $dbname){
     global $mysqli;
@@ -18,34 +20,85 @@ function createDBConnection($dbhost, $dbuser, $dbpass, $dbname){
 function addToInventory(){
     global $mysqli;
     global $dbname;
-    // $stmt = $mysqli->prepare("INSERT INTO $dbname.inventory SET name = $_POST[name], category=$_POST[category], length = $_POST[length]");
-     $stmt = $mysqli->prepare("INSERT INTO $dbname.inventory (name, category, length, rented) VALUES (:name, :category, :length, :rented))");
-     
-    $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':value', $value);
-  $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':value', $value);
 
-     $stmt->execute();
+    if (!$mysqli || $mysqli->connect_error) {
+            echo "Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error;
+    } 
     
+    
+    if(!($stmt = $mysqli->prepare("INSERT INTO $dbname.inventory (name, category, length, rented) VALUES (?, ?, ?, ?)"))){
+        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    $name = $_POST['name'];
+    $category = $_POST['category'];
+    $length =  $_POST['length'];
+    $rented = 1;
+
+    if (!$stmt->bind_param("ssii", $name, $category, $length, $rented )) {
+        echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }   
+    
+    if (!$stmt->execute()) {
+        echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+/*
     if(isset($_POST["addvideo"])){
         echo "<div>Adding Video<div>";
         echo "<label>Name: </label> <div>$_POST[name]</div>";
         echo "<label>Category: </label> <div>$_POST[category]</div>";
         echo "<label>Length: <label> </label> <div>$_POST[length]</div>";
     }
+    */
+    
+    unset($stmt);
 }
 
 function getInventory(){
-    $getInventory = $mysqli->prepare("SELECT name, category, length, rented FROM $dbname.inventory");
+    global $inventory;
+    global $mysqli;
+    global $dbname;
+    
+    if(!($inventory  = $mysqli->prepare("SELECT id, name, category, length, rented FROM $dbname.inventory"))){
+        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+    
+    if (!$inventory->execute()) {
+        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
 }
-
-function getFilteredInventory(){
-    $getFilteredInventory = $mysqli->prepare("SELECT name, category, length, rented FROM $dbname.inventory WHERE category = ?");
+ 
+function createInventoryTable(){
+    
+    global $inventory;
+    
+    $id = NULL;
+    $name = NULL;
+    $category = NULL;
+    $length =  NULL;
+    $rented = NULL;
+    
+    if (!$inventory->bind_result($id, $name, $category, $length, $rented )) {
+        echo "Binding results failed: (" . $stmt->errno . ") " . $stmt->error;
+    }  
+    
+    echo "<table><tbody>";
+    echo "<tr><th>name<th>category<th>length<th>rented</tr>";
+    
+    while ($inventory->fetch()) {
+        echo "<tr id='$id'><td>$name<td>$category<td>$length<td>$rented</tr>";
+    }
+    
+    echo "</tbody></table>";
 }
 
 createDBConnection($dbhost, $dbuser, $dbpass, $dbname);
-addToInventory();
+if(isset($_POST["addvideo"])){
+    addToInventory();
+}
+getInventory();
+
 ?>
 
 <!DOCTYPE html>
@@ -66,7 +119,8 @@ Anachronistic Video Rental Example
     <label>Length: <label> </label> <input type="number" name="length">
 </form>
 </div>
-
-
+<div>
+    <?php createInventoryTable(); ?>
+</div>
 </body>
 </html>
