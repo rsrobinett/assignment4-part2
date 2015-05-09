@@ -60,6 +60,48 @@ function displayDropTableMessage($dbname){
         droptable($dbname);
     }
 }
+
+function instertTestData($dbname){
+    global $mysqli;
+    
+    $sql = "
+    INSERT INTO $dbname.inventory (name, category, length) VALUES
+    ('Avengers: Age of Ultron', 'Action', 141),
+    ('Furious Seven', 'Action', 137),
+    ('Mad Max: Fury Road', 'Action', 120),
+    ('The Avengers', 'Action', 143),
+    ('Jupiter Ascending', 'Action', 127),
+    ('Kingsman: The Secret Service', 'Comedy', 129),
+    ('Mortdecai', 'Comedy', 107),
+    ('Paul Blart: Mall Cop 2', 'Comedy', 94),
+    ('The Wedding Ringer', 'Comedy', 101),
+    ('Home', 'Comedy', 94),
+    ('The Age of Adaline', 'Drama', 112),
+    ('Ex Machina', 'Drama', 108),
+    ('The Water Diviner', 'Drama', 111),
+    ('Fifty Shades of Gray', 'Drama', 125),
+    ('The Longest Ride', 'Drama', 139);
+    ";
+
+    if (!$mysqli || $mysqli->connect_error) {
+        echo "Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error;
+    } 
+   
+   if($mysqli->query($sql)){
+        echo "Inserted Test Data";
+    } else {
+        echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+}
+
+function displayInstertTestDataMessage($dbname){
+    if(isset($_POST["inserttestdata"])){
+        echo "inserting test data ";
+        instertTestData($dbname);
+    }
+}  
+  
+    
 ?>
 
 <!DOCTYPE html>
@@ -83,5 +125,9 @@ function displayDropTableMessage($dbname){
 </form>
 <div><?php displayDropTableMessage($dbname) ?></div>
 </div>
+<form action="setup.php" method="post">
+    <input type="submit" value="Add Test Data" name="inserttestdata">
+</form>
+<div><?php displayInstertTestDataMessage($dbname) ?></div>
 </body>
 </html>
