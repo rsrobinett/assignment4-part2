@@ -17,6 +17,25 @@ function createDBConnection($dbhost, $dbuser, $dbpass, $dbname){
     } 
 }
 
+function changeStatus($id, $currentstatus){
+    global $mysqli;
+    global $dbname;
+     
+    $newstatus = !$currentstatus;
+     
+    if(!($stmt  = $mysqli->prepare("UPDATE $dbname.inventory SET rented = ? where id = ?"))){
+        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+    
+    if (!$stmt->bind_param("ii", $newstatus, $id )) {
+        echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }  
+    
+    if (!$stmt->execute()) {
+        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+}
+
 function deleteIdFromInventory($id){
     global $mysqli;
     global $dbname;
@@ -125,7 +144,15 @@ function createInventoryTable(){
     
     while ($inventory->fetch()) {
         $strRented = transformRentBool($rented);
-        echo "<tr><td><form  action='inventory.php' method='post'><input type='submit' value='Delete' name='deletebyid'/><input type='hidden' name='id' value='$id' required></form><td>$name<td>$category<td>$length<td>$strRented</tr>";
+        $checkinout =transformCheckoutType($rented);
+        echo "<tr>";
+        echo "<td><form  action='inventory.php' method='post'><input type='submit' value='Delete' name='deletebyid'/><input type='hidden' name='id' value='$id' required></form>";
+        echo "<td>$name";
+        echo "<td>$category";
+        echo "<td>$length";
+        echo "<td>$strRented";
+        echo "<td><form  action='inventory.php' method='post'><input type='submit' value='$checkinout' name='changestatus'/><input type='hidden' name='id' value='$id' required><input type='hidden' name='currentstatus' value='$rented' required></form>";
+        echo "</tr>";
     }
     
     echo "</tbody></table>";
@@ -136,6 +163,13 @@ function transformRentBool($rented){
         return "available";
     }
     return "checked out";
+}
+
+function transformCheckoutType($rented){
+    if(!$rented){
+        return "check out";
+    }
+    return "checked in";
 }
 
 createDBConnection($dbhost, $dbuser, $dbpass, $dbname);
@@ -178,6 +212,9 @@ if(isset($_POST["deleteall"])){
 }
 if(isset($_POST["deletebyid"])){
     deleteIdFromInventory($_POST["id"]);
+}
+if(isset($_POST["changestatus"])){
+    changeStatus($_POST["id"],$_POST["currentstatus"]);
 }
 
 getCategorySelectOptions();
