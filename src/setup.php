@@ -7,65 +7,65 @@ include($dbCredentials);
 global $mysqli;
 
 function createDBConnection($dbhost, $dbuser, $dbpass, $dbname){
-    global $mysqli;
     $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+    return $mysqli;
     // Check connection
     if (!$mysqli || $mysqli->connect_error) {
         echo "Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error;
     } 
 }
 
-function displayDBConnectionInfo($dbhost, $dbname){
-    global $mysqli;
+function displayDBConnectionInfo($mysqli, $dbhost, $dbname){
      if (!$mysqli || $mysqli->connect_error) {
         echo "<div> Connected to host: $dbhost </div>";
         echo "<div> Connected to database: $dbname </div>";  
      }
 }
 
-function createtable($dbname){
-    global $mysqli;
-    $createtablesql = "CREATE TABLE $dbname.inventory (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,name VARCHAR( 255 ) NOT NULL ,category VARCHAR( 255 ) NULL ,length TINYINT NULL ,rented BOOL NOT NULL ,UNIQUE (name))";
-    global $mysqli;
+function createtable($mysqli, $db){
+    $createtablesql = "CREATE TABLE $db.inventory (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY 
+    , name VARCHAR( 255 ) NOT NULL 
+    , category VARCHAR( 255 ) NULL 
+    , length INT NULL
+    , rented BOOL NOT NULL DEFAULT 0 
+    , UNIQUE (name)
+    , CHECK (length > 0 OR ISNULL(length)))";
     if($mysqli->query($createtablesql)){
         echo "Created Table";
     } else {
-        echo "table creation was not successful";
+        echo "Create Table Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
     }
 }
 
-function droptable($dbname){
-    global $mysqli;
-    $droptablesql = "DROP TABLE $dbname.inventory";
-    global $mysqli;
+function droptable($mysqli, $db){
+    $droptablesql = "DROP TABLE $db.inventory";
     if($mysqli->query($droptablesql)){
         echo "Dropped Table";
     } else {
-        echo "table drop was not successful";
+        echo "Drop Table Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
     }
 }
 
-createDBConnection($dbhost, $dbuser, $dbpass, $dbname);
+$mysqli = createDBConnection($dbhost, $dbuser, $dbpass, $dbname);
 
-function displayCreateTableMessage($dbname){
+function displayCreateTableMessage($mysqli, $db){
     if(isset($_POST["createtable"])){
         echo "creating table";
-        createtable($dbname);
+        createtable($mysqli, $db);
     }
 }
 
-function displayDropTableMessage($dbname){
+function displayDropTableMessage($mysqli, $db){
     if(isset($_POST["droptable"])){
         echo "dropping table";
-        droptable($dbname);
+        droptable($mysqli, $db);
     }
 }
 
-function instertTestData($dbname){
-    global $mysqli;
-    
+function instertTestData($mysqli, $db){
     $sql = "
-    INSERT INTO $dbname.inventory (name, category, length) VALUES
+    INSERT INTO $db.inventory (name, category, length) VALUES
     ('Avengers: Age of Ultron', 'Action', 141),
     ('Furious Seven', 'Action', 137),
     ('Mad Max: Fury Road', 'Action', 120),
@@ -80,7 +80,8 @@ function instertTestData($dbname){
     ('Ex Machina', 'Drama', 108),
     ('The Water Diviner', 'Drama', 111),
     ('Fifty Shades of Gray', 'Drama', 125),
-    ('The Longest Ride', 'Drama', 139);
+    ('The Longest Ride', 'Drama', 139),
+    ('ztest', null , null);
     ";
 
     if (!$mysqli || $mysqli->connect_error) {
@@ -94,14 +95,12 @@ function instertTestData($dbname){
     }
 }
 
-function displayInstertTestDataMessage($dbname){
+function displayInstertTestDataMessage($mysqli, $dbname){
     if(isset($_POST["inserttestdata"])){
         echo "inserting test data ";
-        instertTestData($dbname);
+        instertTestData($mysqli, $dbname);
     }
 }  
-  
-    
 ?>
 
 <!DOCTYPE html>
@@ -112,22 +111,22 @@ function displayInstertTestDataMessage($dbname){
 </head>
 <body>
 <div>
-<?php displayDBConnectionInfo($dbhost, $dbname) ?>
+<?php displayDBConnectionInfo($mysqli, $dbhost, $dbname) ?>
 </div>
 <div>
 <form action="setup.php" method="post">
     <input type="submit" value="Create Table" name="createtable">
 </form>
-<div><?php displayCreateTableMessage($dbname) ?></div>
+<div><?php displayCreateTableMessage($mysqli, $db) ?></div>
 
 <form action="setup.php" method="post">
     <input type="submit" value="Drop Table" name="droptable">
 </form>
-<div><?php displayDropTableMessage($dbname) ?></div>
+<div><?php displayDropTableMessage($mysqli, $db) ?></div>
 </div>
 <form action="setup.php" method="post">
     <input type="submit" value="Add Test Data" name="inserttestdata">
 </form>
-<div><?php displayInstertTestDataMessage($dbname) ?></div>
+<div><?php displayInstertTestDataMessage($mysqli, $db) ?></div>
 </body>
 </html>

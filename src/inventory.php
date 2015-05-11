@@ -1,134 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Anachronistic Video Rental Example</title>
+</head>
+<body>
+<h1>
+Anachronistic Video Rental Example
+</h1>
 <?php
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 $dbCredentials = "dbCredentials.php";
 include($dbCredentials);
 
-global $mysqli;
-global $inventory;
-global $categoryfilter;
-
 function createDBConnection($dbhost, $dbuser, $dbpass, $dbname){
-    global $mysqli;
     $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+    return $mysqli;
     // Check connection
     if (!$mysqli || $mysqli->connect_error) {
-        echo "Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error;
+        echo "<div class='error'>Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error. "</div>";
     } 
 }
 
-function changeStatus($id, $currentstatus){
-    global $mysqli;
-    global $dbname;
-     
+function changeStatus($mysqli, $db, $id, $currentstatus){
+
     $newstatus = !$currentstatus;
      
-    if(!($stmt  = $mysqli->prepare("UPDATE $dbname.inventory SET rented = ? where id = ?"))){
-        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    if(!($stmt  = $mysqli->prepare("UPDATE $db.inventory SET rented = ? where id = ?"))){
+        echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
     
     if (!$stmt->bind_param("ii", $newstatus, $id )) {
-        echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+        echo "<div class='error'>Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
     }  
     
     if (!$stmt->execute()) {
-        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
+    unset($stmt);
 }
 
-function deleteIdFromInventory($id){
-    global $mysqli;
-    global $dbname;
-     
-    if(!($stmt  = $mysqli->prepare("DELETE FROM $dbname.inventory where id = ?"))){
-        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+function deleteIdFromInventory($mysqli, $db, $id){
+
+    if(!($stmt  = $mysqli->prepare("DELETE FROM $db.inventory where id = ?"))){
+        echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
     
     if (!$stmt->bind_param("i", $id )) {
-        echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+        echo "<div class='error'>Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
     }  
     
     if (!$stmt->execute()) {
-        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
+    unset($stmt);
 }
 
-function deleteAllInventory(){
-    global $mysqli;
-    global $dbname;
-    
-    if(!($stmt  = $mysqli->prepare("DELETE FROM $dbname.inventory"))){
-        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+function deleteAllInventory($mysqli, $db){
+
+    if(!($stmt  = $mysqli->prepare("DELETE FROM $db.inventory"))){
+        echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
 
     if (!$stmt->execute()) {
-        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
+    unset($stmt);
 }
     
-function addToInventory(){
-    global $mysqli;
-    global $dbname;
+function addToInventory($mysqli, $db){
 
     if (!$mysqli || $mysqli->connect_error) {
-            echo "Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error;
+            echo "<div class='error'>Connection error " .$mysqli->connect_error. " " .$mysqli->connect_error. "</div>";
     } 
     
     
-    if(!($stmt = $mysqli->prepare("INSERT INTO $dbname.inventory (name, category, length, rented) VALUES (?, ?, ?, ?)"))){
-        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    if(!($stmt = $mysqli->prepare("INSERT INTO $db.inventory (name, category, length, rented) VALUES (?, ?, ?, ?)"))){
+        echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
 
-    $name = $_POST['name'];
-    $category = $_POST['category'];
-    $length =  $_POST['length'];
-    $rented = 1;
+    $name = trim($_POST['name']);
+    $category = trim($_POST['category']);
+    if(trim($_POST['length'])==0||trim($_POST['length'])==null){$length = null;}else{$length = trim($_POST['length']);}
+    $rented = 0;
 
     if (!$stmt->bind_param("ssii", $name, $category, $length, $rented )) {
-        echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+        echo "<div class='error'>Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
     }   
     
     if (!$stmt->execute()) {
-        echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+        echo "<div class='error'>Execute failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
     }
 
     unset($stmt);
 }
 
-function getInventory(){
-    global $inventory;
-    global $mysqli;
-    global $dbname;
-    
+function getInventory($mysqli, $db){
+    $inventory;
     if(isset($_POST['filtercategory']) && $_POST['filtercategory'] !== 'other'){
     //case when filter is set and it is not set to other
         $filterValue = $_POST['filtercategory'];
 
-        if(!($inventory  = $mysqli->prepare("SELECT id, name, category, length, rented FROM $dbname.inventory where category = ? ORDER BY name"))){
-            echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        if(!($inventory  = $mysqli->prepare("SELECT id, name, category, length, rented FROM $db.inventory where category = ? ORDER BY name"))){
+            echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
         }
         
         if (!$inventory->bind_param("s", $filterValue )) {
-            echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+            echo "<div class='error'>Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
         }  
-        
         
     } else {
     //case when no filter is set or filter is set to other    
-        if(!($inventory  = $mysqli->prepare("SELECT id, name, category, length, rented FROM $dbname.inventory ORDER BY name"))){
-            echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        if(!($inventory  = $mysqli->prepare("SELECT id, name, category, length, rented FROM $db.inventory ORDER BY name"))){
+            echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
         }
     }
     
     if (!$inventory->execute()) {
-        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
+    } else {
+        return $inventory;
     }
 }
  
-function createInventoryTable(){
-    
-    global $inventory;
-    
+function createInventoryTable($inventory){
     $id = NULL;
     $name = NULL;
     $category = NULL;
@@ -136,7 +132,7 @@ function createInventoryTable(){
     $rented = NULL;
     
     if (!$inventory->bind_result($id, $name, $category, $length, $rented )) {
-        echo "Binding results failed: (" . $stmt->errno . ") " . $stmt->error;
+        echo "<div class='error'>Binding results failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
     }  
     
     echo "<table><tbody>";
@@ -156,6 +152,8 @@ function createInventoryTable(){
     }
     
     echo "</tbody></table>";
+    
+    unset($inventory);
 }
 
 function transformRentBool($rented){
@@ -172,33 +170,97 @@ function transformCheckoutType($rented){
     return "checked in";
 }
 
-createDBConnection($dbhost, $dbuser, $dbpass, $dbname);
+$mysqli = createDBConnection($dbhost, $dbuser, $dbpass, $dbname);
+
 if(isset($_POST["addvideo"])){
-    addToInventory();
+    if(validateInput($mysqli, $db)==0){
+        addToInventory($mysqli, $db);
+    }
 }
 
-function getCategorySelectOptions(){
-    global $mysqli;
-    global $dbname;
-    global $categoryfilter;
+function validateInput($mysqli, $db){
+    $name = trim($_POST['name']);
+    $category = trim($_POST['category']);
+    $length = trim($_POST['length']);
+    $validationerrors = 0;
     
-    if(!($categoryfilterQuery  = $mysqli->prepare("SELECT DISTINCT category FROM $dbname.inventory order by category"))){
-        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    //check if name is not null
+    if($name === '' || $name === null){
+        echo "<div class='error'>$name cannot be blank. </div>";
+        $validationerrors++;
+    }
+    
+    //check if name exists in database
+    if(!($stmt = $mysqli->prepare("SELECT id FROM $db.inventory where name = ?"))){
+        echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
+    }
+    
+    if (!$stmt->bind_param("s", $name )) {
+        echo "<div class='error'>Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
+    }  
+    
+    if (!$stmt->execute()) {
+        echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
+    } 
+    if($stmt->fetch()){
+        echo "<div class='error'>$name already exists in the database. </div>";
+        $validationerrors++;
+    }
+    unset($stmt);
+    
+    //check if name too long
+    if(strlen($name) > 255){
+        echo "<div class='error'>$name is too long it must be 255 characters or less. </div>";
+        $validationerrors++;
+    }
+    
+    //check in category too long
+    if(strlen($category) > 255){
+        echo "<div class='error'>$category is too long it must be 255 characters or less. </div>";
+        $validationerrors++;
+    }
+    
+    //check if length is null or greater than 0. 
+    echo "\$length = $length";
+    if(!isPositiveInteger($length) && $length != null && $length != '' ){
+        echo "<div class='error'>$length must be blank or a positive integer. </div>";
+        $validationerrors++;
+    }
+    
+    return $validationerrors;
+}
+
+function isPositiveInteger($string){
+  if(is_numeric($string) && ($string == (int)$string) && ((int)$string > 0)) {
+    return true;
+  }
+  return false; 
+}
+
+
+function getCategorySelectOptions($mysqli, $db){
+    $categoryfilterQuery;
+    $categoryfilter = null;
+    if(!($categoryfilterQuery = $mysqli->prepare("SELECT DISTINCT category FROM $db.inventory order by category"))){
+        echo "<div class='error'>Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     }
 
     if (!$categoryfilterQuery->execute()) {
-        echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     } 
     
-    $category = NULL;
+    $category = null;
     
     if (!$categoryfilterQuery->bind_result($category )) {
-        echo "Binding results failed: (" . $categoryfilterQuery->errno . ") " . $categoryfilterQuery->error;
+        echo "<div class='error'>Binding results failed: (" . $categoryfilterQuery->errno . ") " . $categoryfilterQuery->error. "</div>";
     } 
     
     while ($categoryfilterQuery->fetch()) {
         $categoryfilter[] = $category;
     }
+    
+    unset($categoryfilterQuery);
+    return $categoryfilter;
 }
 
 function printCategories($categoryfilter){
@@ -208,37 +270,31 @@ function printCategories($categoryfilter){
 }
 
 if(isset($_POST["deleteall"])){
-    deleteAllInventory();
+    deleteAllInventory($mysqli, $db);
 }
 if(isset($_POST["deletebyid"])){
-    deleteIdFromInventory($_POST["id"]);
+    deleteIdFromInventory($mysqli, $db,$_POST["id"]);
 }
 if(isset($_POST["changestatus"])){
-    changeStatus($_POST["id"],$_POST["currentstatus"]);
+    changeStatus($mysqli, $db,$_POST["id"],$_POST["currentstatus"]);
 }
 
-getCategorySelectOptions();
-getInventory();
+$categoryfilter = getCategorySelectOptions($mysqli, $db);
+$inventory = getInventory($mysqli, $db);
 
 
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Anachronistic Video Rental Example</title>
-</head>
-<body>
-<h1>
-Anachronistic Video Rental Example
-</h1>
 <div>
 <form action="inventory.php" method="post">
     <input type="submit" value="Add" name="addvideo">
     <label for="name">Name: </label> <input type="text" name="name" required>
     <label for="category">Category: </label> <input type="text" name="category">
-    <label for="length">Length: <label> </label> <input type="number" name="length">
+    <!--[if IE]>
+        <label for="length">Length: <label> </label> <input type="text" name="length">
+    <![endif]-->
+    <![if !IE]>
+        <label for="length">Length: <label> </label> <input type="number" name="length" min="1">
+    <![endif]>
 </form>
 </div>
 
@@ -253,7 +309,7 @@ Anachronistic Video Rental Example
 </form>
 </div>
 <div>
-    <?php createInventoryTable(); ?>
+    <?php createInventoryTable($inventory); ?>
 </div>
 <form action="inventory.php" method="post" >
     <input type="submit" value="Delete All" name="deleteall"/>
