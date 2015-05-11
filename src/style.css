@@ -1,0 +1,93 @@
+body {
+  color: #333333;
+  font-family: Helvetica, arial, sans-serif;
+  margin: 0 auto 80px;
+  width: 90%;
+}
+header {
+  background-color: #08A6E7;
+  color: #fff;
+  padding-top: 25px;
+  padding-bottom: 17px;
+}
+h1 {
+  font-size: 20px;
+  font-weight: normal;
+  margin: 0 auto;
+  padding-left: 10px;
+}
+.container {
+  overflow: auto;
+}
+.btn {
+  border: none;
+  border-radius: 2px;
+  height: 30px;
+  line-height: 30px;
+  outline: 0;
+  text-transform: uppercase;
+  color: #FFF;
+  background-color: #26a69a;
+  text-align: center;
+  cursor: pointer;
+  transition: all .3s ease-out;
+  width: 120px;
+}
+
+.btn:hover {
+  background-color: #2bbbad;
+  -webkit-box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
+}
+.btn--delete {
+  background-color: #A62630;
+}
+.btn--delete:hover {
+  background-color: #D23A51
+}
+.btn--check {
+  background-color: #296FDB
+}
+.btn--check:hover {
+  background-color: #467FD7
+}
+
+form:not(.mini-form){
+  margin: 20px 0;
+}
+
+input[type=submit] {
+  margin-right: 20px;
+  display: inline-block;
+}
+
+.btn--add {
+    vertical-align: bottom;
+}
+
+.form-group {
+  display: inline-block;
+  width: 200px;
+}
+
+input[type=text], select {
+  margin-top: 4px;
+  display: block;
+  width: 100%;
+  height: 30px;
+  box-sizing: border-box;
+}
+
+table{
+  border-spacing: 10px;
+}
+
+thead tr {
+  padding-left: 200px;
+  font-weight: 600;
+}
+td {
+  width: 200px;
+}
+

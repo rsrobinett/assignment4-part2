@@ -2,12 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Anachronistic Video Rental Example</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Video Rental</title>
 </head>
 <body>
-<h1>
-Anachronistic Video Rental Example
-</h1>
+    <header>
+        <h1>Video Rental</h1>
+    </header>
 <?php
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
@@ -135,22 +136,21 @@ function createInventoryTable($inventory){
         echo "<div class='error'>Binding results failed: (" . $stmt->errno . ") " . $stmt->error. "</div>";
     }  
     
-    echo "<table><tbody>";
-    echo "<tr><th><th>name<th>category<th>length<th>status</tr>";
-    
+    echo "<table>";
+    echo "<thead><tr><td><td>name<td>category<td>length<td>status</td></thead>";
+    echo "<tbody>";
     while ($inventory->fetch()) {
         $strRented = transformRentBool($rented);
         $checkinout =transformCheckoutType($rented);
         echo "<tr>";
-        echo "<td><form  action='inventory.php' method='post'><input type='submit' value='Delete' name='deletebyid'/><input type='hidden' name='id' value='$id' required></form>";
+        echo "<td><form class='mini-form' action='inventory.php' method='post'><input class='btn btn--delete' type='submit' value='Delete' name='deletebyid'/><input type='hidden' name='id' value='$id' required></form>";
         echo "<td>$name";
         echo "<td>$category";
         echo "<td>$length";
         echo "<td>$strRented";
-        echo "<td><form  action='inventory.php' method='post'><input type='submit' value='$checkinout' name='changestatus'/><input type='hidden' name='id' value='$id' required><input type='hidden' name='currentstatus' value='$rented' required></form>";
+        echo "<td><form class='mini-form' action='inventory.php' method='post'><input class='btn btn--check' type='submit' value='$checkinout' name='changestatus'/><input type='hidden' name='id' value='$id' required><input type='hidden' name='currentstatus' value='$rented' required></form>";
         echo "</tr>";
     }
-    
     echo "</tbody></table>";
     
     unset($inventory);
@@ -203,27 +203,26 @@ function validateInput($mysqli, $db){
         echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     } 
     if($stmt->fetch()){
-        echo "<div class='error'>$name already exists in the database. </div>";
+        echo "<div class='error'>$name already exists in the database.  The name should be unique. </div>";
         $validationerrors++;
     }
     unset($stmt);
     
     //check if name too long
     if(strlen($name) > 255){
-        echo "<div class='error'>$name is too long it must be 255 characters or less. </div>";
+        echo "<div class='error'>$name is an invalid name.  The name is too long it must be 255 characters or less. </div>";
         $validationerrors++;
     }
     
     //check in category too long
     if(strlen($category) > 255){
-        echo "<div class='error'>$category is too long it must be 255 characters or less. </div>";
+        echo "<div class='error'>$category is an invalid category.  The category is too long it must be 255 characters or less. </div>";
         $validationerrors++;
     }
     
     //check if length is null or greater than 0. 
-    echo "\$length = $length";
     if(!isPositiveInteger($length) && $length != null && $length != '' ){
-        echo "<div class='error'>$length must be blank or a positive integer. </div>";
+        echo "<div class='error'>$length is an invalid length.  The length must be blank or a positive integer. </div>";
         $validationerrors++;
     }
     
@@ -256,6 +255,7 @@ function getCategorySelectOptions($mysqli, $db){
     } 
     
     while ($categoryfilterQuery->fetch()) {
+        if($category !== null && trim($category) !=='')
         $categoryfilter[] = $category;
     }
     
@@ -284,35 +284,38 @@ $inventory = getInventory($mysqli, $db);
 
 
 ?>
-<div>
-<form action="inventory.php" method="post">
-    <input type="submit" value="Add" name="addvideo">
-    <label for="name">Name: </label> <input type="text" name="name" required>
-    <label for="category">Category: </label> <input type="text" name="category">
-    <!--[if IE]>
-        <label for="length">Length: <label> </label> <input type="text" name="length">
-    <![endif]-->
-    <![if !IE]>
-        <label for="length">Length: <label> </label> <input type="number" name="length" min="1">
-    <![endif]>
-</form>
-</div>
-
-<div>
-<form action="inventory.php" method="post">
-    <label>Category Filter: </label>
-       <select name="filtercategory">
-          <option value="other" selected>all movies</option>
-          <?php printCategories($categoryfilter); ?>
-      </select>
-    <input type="submit" value="Filter">
-</form>
-</div>
+<div class="container">
+    <form action="inventory.php" method="post">
+        <div class="form-group">
+            <label for="name">Name</label> <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Category</label> <input type="text" name="category">
+        </div>
+        <div class="form-group">
+            <label for="length">Length</label>
+            <input type="text" name="length">
+        </div>
+            <input class="btn btn--add" type="sumbit" value="Add" name="addvideo">
+    </form>
+    <form action="inventory.php" method="post">
+        <div class="form-group">
+        <label>Category Filter: </label>
+           <select name="filtercategory">
+              <option value="other" selected>all movies</option>
+              <?php printCategories($categoryfilter); ?>
+            </select>
+            </div>
+            <div class="form-group">
+        <input class="btn" type="submit" value="Filter">
+        </div>
+    </form>
 <div>
     <?php createInventoryTable($inventory); ?>
 </div>
 <form action="inventory.php" method="post" >
-    <input type="submit" value="Delete All" name="deleteall"/>
+    <input class="btn btn--delete" type="submit" value="Delete All" name="deleteall"/>
 </form>
+</div>
 </body>
 </html>
