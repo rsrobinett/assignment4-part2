@@ -206,26 +206,26 @@ function validateInput($mysqli, $db){
         echo "<div class='error'>Execute failed: (" . $mysqli->errno . ") " . $mysqli->error. "</div>";
     } 
     if($stmt->fetch()){
-        echo "<div class='error'>$name already exists in the database.  The name should be unique. </div>";
+        echo "<div class='error'><strong>$name</strong> already exists in the database.  The name should be unique. </div>";
         $validationerrors++;
     }
     unset($stmt);
     
     //check if name too long
     if(strlen($name) > 255){
-        echo "<div class='error'>$name is an invalid name.  The name is too long it must be 255 characters or less. </div>";
+        echo "<div class='error'><strong>$name</strong> is an invalid name.  The name is too long it must be 255 characters or less. </div>";
         $validationerrors++;
     }
     
     //check in category too long
     if(strlen($category) > 255){
-        echo "<div class='error'>$category is an invalid category.  The category is too long it must be 255 characters or less. </div>";
+        echo "<div class='error'><strong>$category</strong> is an invalid category.  The category is too long it must be 255 characters or less. </div>";
         $validationerrors++;
     }
     
     //check if length is null or greater than 0. 
     if(!isPositiveInteger($length) && $length != null && $length != '' ){
-        echo "<div class='error'>$length is an invalid length.  The length must be blank or a positive integer. </div>";
+        echo "<div class='error'><strong>$length</strong> is an invalid length.  The length must be blank or a positive integer. </div>";
         $validationerrors++;
     }
     
