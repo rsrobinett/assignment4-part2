@@ -1,0 +1,35 @@
+Start: Tue, 12 May 2015 03:51:23 +0000
+End: Tue, 12 May 2015 04:09:10 +0000
+Tasks: styling and finishing touches-2
+
+End: Tue, 12 May 2015 02:51:23 +0000
+End: Tue, 12 May 2015 03:51:23 +0000
+Tasks: styling and finishing touches
+
+Start: Mon, 11 May 2015 20:00:00 +0000
+End: Mon, 11 May 2015 22:42:38 +0000
+Tasks: styling
+
+Start: Mon, 11 May 2015 16:53:46 +0000
+End: Mon, 11 May 2015 18:53:46 +0000
+Tasks: validation and ie specific code
+
+Start: Sat, 9 May 2015 20:27:42 +0000
+End: Sat, 9 May 2015 20:57:18 +0000
+Tasks: added checkin checkout functionality
+
+Start: Sat, 9 May 2015 18:21:32 +0000
+End: Sat, 9 May 2015 20:27:42 +0000
+Tasks: delete by id functionality
+
+Start: Sat, 9 May 2015 15:21:32 +0000
+End: Sat, 9 May 2015 18:21:32 +0000
+Tasks: reading and writing to db
+
+Start: Sat, 9 May 2015 04:30:19 +0000
+End: Sat, 9 May 2015 06:17:04 +0000
+Tasks: writing to database
+
+Start: Sat, 9 May 2015 02:09:19 +0000
+End: Sat, 9 May 2015 04:09:19 +0000
+Tasks: made connection to db
