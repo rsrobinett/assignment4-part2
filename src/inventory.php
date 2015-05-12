@@ -151,7 +151,10 @@ function createInventoryTable($inventory){
         echo "<td><form class='mini-form' action='inventory.php' method='post'><input class='btn btn--check' type='submit' value='$checkinout' name='changestatus'/><input type='hidden' name='id' value='$id' required><input type='hidden' name='currentstatus' value='$rented' required></form>";
         echo "</tr>";
     }
-    echo "</tbody></table>";
+    echo "</tbody><tfooter><tr><td colspan='6'>";
+    echo "<form action='inventory.php' method='post' >";
+    echo "<input class='btn btn--delete' type='submit' value='Delete All' name='deleteall'/>";
+    echo "</form></td></tr></tfooter></table>";
     
     unset($inventory);
 }
@@ -296,11 +299,11 @@ $inventory = getInventory($mysqli, $db);
             <label for="length">Length</label>
             <input type="text" name="length">
         </div>
-            <input class="btn btn--add" type="sumbit" value="Add" name="addvideo">
+            <input class="btn btn--add" type="submit" value="Add" name="addvideo">
     </form>
     <form action="inventory.php" method="post">
         <div class="form-group">
-        <label>Category Filter: </label>
+        <label>Category</label>
            <select name="filtercategory">
               <option value="other" selected>all movies</option>
               <?php printCategories($categoryfilter); ?>
@@ -313,9 +316,7 @@ $inventory = getInventory($mysqli, $db);
 <div>
     <?php createInventoryTable($inventory); ?>
 </div>
-<form action="inventory.php" method="post" >
-    <input class="btn btn--delete" type="submit" value="Delete All" name="deleteall"/>
-</form>
+
 </div>
 </body>
 </html>
